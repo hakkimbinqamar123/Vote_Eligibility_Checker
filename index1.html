@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Eligibility App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        crossorigin="anonymous">
+    <style>
+        body {
+            transition: 0.3s;
+        }
+        .dark-mode {
+            background-color: #222 !important;
+            color: white !important;
+        }
+        .dark-mode input, .dark-mode select {
+            background-color: #444 !important;
+            color: white !important;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container d-flex justify-content-center align-items-center"
+        style="background-color: lightblue; min-height: 80vh; border-radius: 10px; margin-top: 5vh;">
+        <div class="row w-100">
+            <div class="col-2"></div>
+            <div class="col-8 p-4 bg-white shadow rounded">
+                <h3 class="text-primary text-center">🗳 Voting Eligibility Checker</h3>
+
+                <!-- Form -->
+                <form onsubmit="event.preventDefault(); checkEligibility();">
+                    <div class="form-group my-3">
+                        <input id="name" type="text" placeholder="Enter Your Name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label><b>Date of Birth</b></label>
+                        <input id="dob" type="date" class="form-control" required>
+                    </div>
+
+                    <div class="form-group my-3">
+                        <label><b>Select Country</b></label>
+                        <select id="country" class="form-control">
+                            <option value="18">India (18+)</option>
+                            <option value="18">USA (18+)</option>
+                            <option value="16">Brazil (16+)</option>
+                            <option value="18">UK (18+)</option>
+                            <option value="20">UAE (20+)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block">Check Eligibility</button>
+                    <button type="button" onclick="toggleDarkMode()" class="btn btn-secondary btn-block">🌙 Toggle Dark Mode</button>
+                </form>
+
+                <!-- Result -->
+                <div id="result" class="mt-3 text-center font-weight-bold"></div>
+
+                <!-- Progress Bar -->
+                <div class="progress my-3" style="height: 25px;">
+                    <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+                </div>
+
+                <!-- History -->
+                <h5 class="mt-4">History</h5>
+                <ul id="history" class="list-group"></ul>
+            </div>
+            <div class="col-2"></div>
+        </div>
+    </div>
+
+    <script>
+        function calculateAge(dob) {
+            let today = new Date();
+            let birthDate = new Date(dob);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            let m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function generateVoterID() {
+            return "VOTER-" + new Date().getFullYear() + "-" + Math.floor(Math.random() * 1000000);
+        }
+
+        function checkEligibility() {
+            let name = document.getElementById("name").value.trim();
+            let dob = document.getElementById("dob").value;
+            let requiredAge = parseInt(document.getElementById("country").value);
+            let result = document.getElementById("result");
+            let progressBar = document.getElementById("progressBar");
+
+            if (!dob) {
+                result.innerHTML = "⚠️ Please enter your Date of Birth.";
+                result.style.color = "orange";
+                return;
+            }
+
+            let age = calculateAge(dob);
+            let message = "";
+            let color = "";
+
+            // Progress bar
+            let progress = Math.min((age / requiredAge) * 100, 100);
+            progressBar.style.width = progress + "%";
+            progressBar.innerHTML = age + "/" + requiredAge;
+
+            if (age >= requiredAge && age < 120) {
+                let voterID = generateVoterID();
+                message = `✅ Hello <b>${name}</b>, You are <b>${age}</b> years old.<br> You are <span style='color:green;'>Eligible</span> to vote!<br>Your Voter ID: <b>${voterID}</b>`;
+                color = "green";
+            } else if (age < requiredAge && age > 0) {
+                let wait = requiredAge - age;
+                message = `❌ Hello <b>${name}</b>, You are <b>${age}</b> years old.<br> Not Eligible to vote.<br> ⏳ Please wait <b>${wait}</b> more year(s).`;
+                color = "red";
+            } else {
+                message = "⚠️ Invalid Input. Please check again.";
+                color = "orange";
+            }
+
+            result.innerHTML = message;
+            result.style.color = color;
+
+            // Save history
+            saveHistory(name, age, message);
+        }
+
+        function saveHistory(name, age, message) {
+            let history = JSON.parse(localStorage.getItem("voterHistory")) || [];
+            history.push({ name, age, message });
+            localStorage.setItem("voterHistory", JSON.stringify(history));
+            displayHistory();
+        }
+
+        function displayHistory() {
+            let historyList = document.getElementById("history");
+            historyList.innerHTML = "";
+            let history = JSON.parse(localStorage.getItem("voterHistory")) || [];
+            history.slice(-5).reverse().forEach(item => {
+                let li = document.createElement("li");
+                li.className = "list-group-item";
+                li.innerHTML = `${item.name} (${item.age} yrs) → ${item.message}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+        }
+
+        // Load history on page load
+        window.onload = displayHistory;
+    </script>
+</body>
+</html>

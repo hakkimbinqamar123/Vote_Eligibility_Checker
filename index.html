@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Eligibility App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css"
+        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center"
+        style="background-color: lightblue; height: 80vh; width: 50%; margin-top: 10vh; border-radius: 10px;">
+        <div class="row w-100">
+            <div class="col-1"></div>
+            <div class="col-10 p-4 bg-white shadow rounded">
+                <h3 class="text-primary text-center">Voting Eligibility Checker</h3>
+                <form onsubmit="event.preventDefault(); checkEligibility();" action="" class=" shadow-rounded">
+                    <div class="my-3 d-flex flex-column">
+                        <input id="name" type="text" class="form-control form-control-lg shadow-sm mb-3"
+                            placeholder="Enter Your Name">
+                        <label for="">Date of Birth</label>
+                        <input id="dob" type="date" placeholder="" class="form-control mb-3">
+                        <label for="">Select Country</label>
+                        <select name="" id="country" class="form-control mb-3">
+                            <option value="18">India (18+)</option>
+                            <option value="18">USA (18+)</option>
+                            <option value="16">Brazil (16+)</option>
+                            <option value="18">UK (18+)</option>
+                            <option value="20">UAE (20+)</option>
+                        </select>
+                        <button type="submit" onclick="checkAge()" class="btn btn-primary mb-3">Check</button>
+                    </div>
+                    <div id="result" class="mt-3 text-center font-weight-bold"></div>
+                </form>
+            </div>
+            <div class="col-1"></div>
+        </div>
+</body>
+<script>
+    function calculateAge(dob) {
+        let today = new Date()
+        let birthDate = new Date(dob)
+        let age = today.getFullYear() - birthDate.getFullYear()
+        let m = today.getMonth() - birthDate.getMonth()
+        if (m < 0 || (m == 0 && today.getDate() < birthDate.getDate())) {
+            age--
+        }
+        return age;
+    }
+
+    function generateVoterID() {
+        return "VOTER-" + new Date().getFullYear() + "-" + Math.floor(Math.random() * 1000000)
+    }
+
+
+    function checkEligibility() {
+        let name = document.getElementById("name").value;
+        let dob = document.getElementById("dob").value;
+        let requiredAge = parseInt(document.getElementById("country").value);
+        let result = document.getElementById("result");
+
+    if (!dob) {
+        result.innerHTML = "Please enter your Date of Birth."
+        result.style.color = "orange"
+        return
+    }
+
+    let age = calculateAge(dob)
+    let message = ""
+    let color = ""
+
+    if (age >= requiredAge && age < 120) {
+        let voterID = generateVoterID();
+        message = `Hello <b>${name}</b>, you are <b>${age}</b> years old. <br>
+        you are <span style='color:green'>Eligible to vote!</span> Your Voter ID: <b>${voterID}</b>`
+        color = "green"
+    } else if (age < requiredAge && age > 0) {
+        let wait = requiredAge - age;
+        message = `Hello <b>${name}</b>, You are <b>${age}</b> years old.<br> Not Eligible to vote.<br>Please wait <b>${wait}</b> more year(s).`;
+        color = "red";
+    } else {
+        message = "Invalid Input. Please check again.";
+        color = "orange";
+    }
+
+    result.innerHTML = message;
+    result.style.color = color;
+}
+
+</script>
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js"
+    integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
+    crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js"
+    integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy"
+    crossorigin="anonymous"></script>
+
+</html>
