@@ -1,4 +1,5 @@
 🗳 Voting Eligibility Checker
+
 The Voting Eligibility Checker is a simple web application built with HTML, CSS (Bootstrap), and
 JavaScript that allows users to check whether they are eligible to vote based on their date of birth and country-specific voting age rules.
 
